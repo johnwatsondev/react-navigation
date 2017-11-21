@@ -152,9 +152,10 @@ export default function createNavigationContainer<S: NavigationState, O: {}>(
         return;
       }
 
-      this.subs = BackHandler.addEventListener('hardwareBackPress', () =>
-        this.dispatch(NavigationActions.back())
-      );
+      // FIXME: 21/11/2017 remove default back pressed process behaviour
+      // this.subs = BackHandler.addEventListener('hardwareBackPress', () =>
+      //   this.dispatch(NavigationActions.back())
+      // );
 
       Linking.addEventListener('url', this._handleOpenURL);
 
@@ -165,7 +166,7 @@ export default function createNavigationContainer<S: NavigationState, O: {}>(
 
     componentWillUnmount() {
       Linking.removeEventListener('url', this._handleOpenURL);
-      this.subs && this.subs.remove();
+      // this.subs && this.subs.remove();
     }
 
     // Per-tick temporary storage for state.nav

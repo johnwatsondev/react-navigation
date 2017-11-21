@@ -18,6 +18,7 @@ import Header from '../Header/Header';
 import NavigationActions from '../../NavigationActions';
 import addNavigationHelpers from '../../addNavigationHelpers';
 import SceneView from '../SceneView';
+import { BackHandler } from '../../PlatformHelpers';
 
 import type {
   NavigationLayout,
@@ -64,7 +65,7 @@ type Props = {
 
 /**
  * The max duration of the card animation in milliseconds after released gesture.
- * The actual duration should be always less then that because the rest distance 
+ * The actual duration should be always less then that because the rest distance
  * is always less then the full distance of the layout.
  */
 const ANIMATION_DURATION = 500;
@@ -133,6 +134,29 @@ class CardStack extends React.Component<Props> {
         this._screenDetails[newScene.key] = null;
       }
     });
+  }
+
+  componentDidMount() {
+    this.subs = BackHandler.addEventListener('hardwareBackPress', () => {
+      const { navigation, scene } = this.props;
+      const { backPressedListener } = this._getScreenDetails(scene).options;
+
+      // 被嵌套的 CardStack 组件应该优先响应返回按键，例如 CardStack A 包含 CardStack B，那么应该由 B 响应。
+      // 如何区别这个 CardStack 是否是最内层的呢？根据 scene.route.routes 是否存在判断。
+      // 如果是最内层 CardStack，没有 routes 对象，否则存在该对象。
+
+      if (!scene.route.routes) {
+        if (typeof backPressedListener === 'function') {
+          return backPressedListener();
+        } else {
+          return navigation.dispatch(NavigationActions.back());
+        }
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.subs && this.subs.remove();
   }
 
   _getScreenDetails = (scene: NavigationScene): NavigationScreenDetails<*> => {
