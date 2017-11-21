@@ -11,6 +11,7 @@ import {
   View,
   I18nManager,
   Easing,
+  Platform,
 } from 'react-native';
 
 import Card from './Card';
@@ -137,26 +138,30 @@ class CardStack extends React.Component<Props> {
   }
 
   componentDidMount() {
-    this.subs = BackHandler.addEventListener('hardwareBackPress', () => {
-      const { navigation, scene } = this.props;
-      const { backPressedListener } = this._getScreenDetails(scene).options;
+    if (Platform.OS === 'android') {
+      this.subs = BackHandler.addEventListener('hardwareBackPress', () => {
+        const { navigation, scene } = this.props;
+        const { backPressedListener } = this._getScreenDetails(scene).options;
 
-      // 被嵌套的 CardStack 组件应该优先响应返回按键，例如 CardStack A 包含 CardStack B，那么应该由 B 响应。
-      // 如何区别这个 CardStack 是否是最内层的呢？根据 scene.route.routes 是否存在判断。
-      // 如果是最内层 CardStack，没有 routes 对象，否则存在该对象。
+        // 被嵌套的 CardStack 组件应该优先响应返回按键，例如 CardStack A 包含 CardStack B，那么应该由 B 响应。
+        // 如何区别这个 CardStack 是否是最内层的呢？根据 scene.route.routes 是否存在判断。
+        // 如果是最内层 CardStack，没有 routes 对象，否则存在该对象。
 
-      if (!scene.route.routes) {
-        if (typeof backPressedListener === 'function') {
-          return backPressedListener();
-        } else {
-          return navigation.dispatch(NavigationActions.back());
+        if (!scene.route.routes) {
+          if (typeof backPressedListener === 'function') {
+            return backPressedListener();
+          } else {
+            return navigation.dispatch(NavigationActions.back());
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   componentWillUnmount() {
-    this.subs && this.subs.remove();
+    if (Platform.OS === 'android') {
+      this.subs && this.subs.remove();
+    }
   }
 
   _getScreenDetails = (scene: NavigationScene): NavigationScreenDetails<*> => {
