@@ -11,7 +11,6 @@ import {
   View,
   I18nManager,
   Easing,
-  Platform,
 } from 'react-native';
 
 import Card from './Card';
