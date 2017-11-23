@@ -287,18 +287,24 @@ export default (
         const key = action.key;
         let backRouteIndex = null;
         if (key) {
-          let isActionKeyActualRouteName = false;
+          let foundTargetRouteName = false;
           const backRoute = state.routes.find((route: NavigationRoute) => {
             if (route.routeName === key) {
-              isActionKeyActualRouteName = true;
+              foundTargetRouteName = true;
             }
             return route.key === key || route.routeName === key;
           });
           /* $FlowFixMe */
           backRouteIndex = state.routes.indexOf(backRoute);
 
-          if (isActionKeyActualRouteName) {
+          if (foundTargetRouteName) {
+            // if found the desired route by routeName, we need back to this screen
             backRouteIndex += 1;
+          }
+
+          if (backRouteIndex === -1) {
+            // if not found the desired route, popping current screen
+            backRouteIndex = null;
           }
         }
         if (backRouteIndex == null) {
