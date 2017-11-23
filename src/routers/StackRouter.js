@@ -287,11 +287,19 @@ export default (
         const key = action.key;
         let backRouteIndex = null;
         if (key) {
-          const backRoute = state.routes.find(
-            (route: NavigationRoute) => route.key === key
-          );
+          let isActionKeyActualRouteName = false;
+          const backRoute = state.routes.find((route: NavigationRoute) => {
+            if (route.routeName === key) {
+              isActionKeyActualRouteName = true;
+            }
+            return route.key === key || route.routeName === key;
+          });
           /* $FlowFixMe */
           backRouteIndex = state.routes.indexOf(backRoute);
+
+          if (isActionKeyActualRouteName) {
+            backRouteIndex += 1;
+          }
         }
         if (backRouteIndex == null) {
           return StateUtils.pop(state);
